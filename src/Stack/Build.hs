@@ -59,7 +59,10 @@ build :: HasEnvConfig env
       -> Maybe FileLock
       -> BuildOptsCLI
       -> RIO env ()
-build msetLocalFiles mbuildLk boptsCli = fixCodePage $ do
+build msetLocalFiles mbuildLk boptsCli = do
+  mcp <- view $ configL.to configModifyCodePage
+  ghcVersion <- view $ actualCompilerVersionL.to getGhcVersion
+  fixCodePage mcp ghcVersion $ do
     bopts <- view buildOptsL
     let profiling = boptsLibProfile bopts || boptsExeProfile bopts
     let symbols = not (boptsLibStrip bopts || boptsExeStrip bopts)

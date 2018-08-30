@@ -37,7 +37,7 @@ getTerminalWidth =
         WindowWidth w <- peek p
         return . Just . fromIntegral $ w
 
-fixCodePage :: a -> a
+fixCodePage :: x -> y -> a -> a
 fixCodePage = id
 
 -- | hIsTerminaDevice does not recognise handles to mintty terminals as terminal

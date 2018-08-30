@@ -6,8 +6,6 @@ module System.Terminal
 ) where
 
 import Stack.Prelude
-import Stack.Types.Config
-import Stack.Types.Compiler (getGhcVersion)
 import System.Win32 (isMinTTYHandle, withHandleToHANDLE)
 import System.Win32.Console (setConsoleCP, setConsoleOutputCP, getConsoleCP, getConsoleOutputCP)
 
@@ -17,10 +15,13 @@ getTerminalWidth = return Nothing
 
 -- | Set the code page for this process as necessary. Only applies to Windows.
 -- See: https://github.com/commercialhaskell/stack/issues/738
-fixCodePage :: HasEnvConfig env => RIO env a -> RIO env a
-fixCodePage inner = do
-    mcp <- view $ configL.to configModifyCodePage
-    ghcVersion <- view $ actualCompilerVersionL.to getGhcVersion
+fixCodePage
+  :: HasLogFunc env
+  => Bool -- ^ modify code page?
+  -> Version -- ^ GHC version
+  -> RIO env a
+  -> RIO env a
+fixCodePage mcp ghcVersion inner = do
     if mcp && ghcVersion < mkVersion [7, 10, 3]
         then fixCodePage'
         -- GHC >=7.10.3 doesn't need this code page hack.
